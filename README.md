@@ -1,1 +1,26 @@
-# StarSystemGenerator
+# StarSystemGenerator v0.0
+
+## ライセンス
+CC BY-NC-SA 4.0に準拠
+（ないと思うけど）営利目的で利用したい場合は別途連絡ください。
+StarSystemGenerator  © 2025 by ぷれ is licensed under CC BY-NC-SA 4.0. To view a copy of this license, visit https://creativecommons.org/licenses/by-nc-sa/4.0/
+
+## 動作要件 
+このプログラムの実行には、「Microsoft Visual C++ 2015-2022 再頒布可能パッケージ (x64)」が必要です。 未インストールの場合は、Microsoft公式サイトからダウンロードしてインストールしてください。
+
+## 機能
+リアルな架空の星空を作るソフトです
+現状は
+1. 指定した半径の球体内にリアルなアルゴリズムで星を形成し、そのデーターをcsv化する機能。
+2. 生成したデータをそのままベクター画像で投影する機能
+があります。
+
+## 簡単な使い方
+exeファイルを実行するだけ！！
+csvとsvgファイルがexeと同じファイル内に生成されるはずです。
+
+### 再現性について
+プログラムを実行すると、使用された「シード値」がコンソールに表示されます。
+
+*   引数なしで実行した場合：ランダムなシード値が使用されます。
+*   引数ありで実行した場合：`star_system_generator.exe [シード値]` のように、コンソールに表示されたシード値を指定することで、全く同じ星空を何度でも再現できます。

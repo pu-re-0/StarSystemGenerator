@@ -12,6 +12,7 @@
 #include "cluster_generator.h"
 #include <omp.h>     // OpenMPヘッダー
 #include <optional>  // For std::optional
+#include <sstream>   // For std::stringstream
 
 
 // ヘルパー関数：スペクトル型に基づいてSVGで使う色を返す
@@ -314,12 +315,118 @@ void generate_star_map_svg(const std::vector<StarSystem>& all_stars, const std::
     std::cout << "星図が " << filename << " に正常に書き込まれました。" << std::endl;
 }
 
-int main() {
-    // 1. Setup random number generator
-    // Using std::random_device for non-deterministic seeding, or a fixed seed for reproducibility
-    std::random_device rd;
-    //std::mt19937 gen(rd()); // Seed with a random device 
-    std::mt19937 gen(2025062809); // For reproducible results, use a fixed seed like 42  数値はペルド・ペルソーネより
+// Helper to split a string by a delimiter
+std::vector<std::string> split(const std::string& s, char delimiter) {
+    std::vector<std::string> tokens;
+    std::string token;
+    std::istringstream tokenStream(s);
+    while (std::getline(tokenStream, token, delimiter)) {
+        tokens.push_back(token);
+    }
+    return tokens;
+}
+
+// CSVから星と星団のデータを読み込む関数
+std::optional<std::pair<std::vector<StarSystem>, std::vector<ClusterProperties>>>
+load_stars_and_clusters_from_csv(const std::string& filename) {
+    std::ifstream ifs(filename);
+    if (!ifs.is_open()) {
+        std::cerr << "エラー: ファイル " << filename << " を開けませんでした。" << std::endl;
+        return std::nullopt;
+    }
+
+    std::vector<StarSystem> stars;
+    std::vector<ClusterProperties> clusters;
+    std::string line;
+    bool header_skipped = false;
+
+    while (std::getline(ifs, line)) {
+        if (line.empty()) continue;
+
+        // コメント行の処理
+        if (line[0] == '#') {
+            // 星団プロパティの行を解析
+            if (line.rfind("# CLUSTER_PROP,", 0) == 0) { // C++20のstarts_withの代わり
+                std::string prop_data = line.substr(std::string("# CLUSTER_PROP,").length());
+                std::vector<std::string> tokens = split(prop_data, ',');
+                if (tokens.size() == 10) {
+                    try {
+                        ClusterProperties prop;
+                        prop.id = std::stoi(tokens[0]);
+                        prop.center_x = std::stod(tokens[1]);
+                        prop.center_y = std::stod(tokens[2]);
+                        prop.center_z = std::stod(tokens[3]);
+                        prop.major_axis_a = std::stod(tokens[4]);
+                        prop.minor_axis_b = std::stod(tokens[5]);
+                        prop.rot_alpha = std::stod(tokens[6]);
+                        prop.rot_beta = std::stod(tokens[7]);
+                        prop.rot_gamma = std::stod(tokens[8]);
+                        prop.is_old = std::stoi(tokens[9]) != 0;
+                        clusters.push_back(prop);
+                    } catch (const std::exception& e) {
+                        std::cerr << "警告: 星団プロパティ行の解析に失敗しました: " << line << " (" << e.what() << ")" << std::endl;
+                    }
+                }
+            }
+            continue; // 他のコメント行はスキップ
+        }
+
+        // ヘッダー行をスキップ
+        if (!header_skipped) {
+            header_skipped = true;
+            continue;
+        }
+
+        // データ行の処理
+        std::vector<std::string> tokens = split(line, ',');
+        if (tokens.size() == 14) {
+            try {
+                StarSystem s;
+                s.id = std::stoll(tokens[0]);
+                s.binary_system_id = std::stoll(tokens[1]);
+                s.apparent_magnitude = std::stod(tokens[2]);
+                s.spectral_type = tokens[3];
+                s.absolute_magnitude = std::stod(tokens[4]);
+                s.distance_r = std::stod(tokens[5]);
+                s.longitude_theta = std::stod(tokens[6]);
+                s.latitude_phi = std::stod(tokens[7]);
+                s.x = std::stod(tokens[8]);
+                s.y = std::stod(tokens[9]);
+                s.z = std::stod(tokens[10]);
+                s.cluster_id = std::stoi(tokens[11]);
+                s.system_absolute_magnitude = std::stod(tokens[12]);
+                s.system_apparent_magnitude = std::stod(tokens[13]);
+                stars.push_back(s);
+            } catch (const std::exception& e) {
+                std::cerr << "警告: データ行の解析に失敗しました: " << line << " (" << e.what() << ")" << std::endl;
+            }
+        }
+    }
+
+    if (stars.empty()) {
+        std::cerr << "エラー: " << filename << " から星データを読み込めませんでした。ファイルが空か、形式が正しくない可能性があります。" << std::endl;
+        return std::nullopt;
+    }
+
+    std::cout << filename << " から " << stars.size() << " 個の星と " << clusters.size() << " 個の星団データを読み込みました。" << std::endl;
+    return std::make_pair(stars, clusters);
+}
+
+// 描画パラメータをユーザーから取得するヘルパー関数
+void get_drawing_parameters_from_user(
+    bool& show_celestial_lines,
+    double& max_magnitude_for_svg,
+    bool& show_cluster_regions,
+    bool& show_star_labels,
+    double& label_magnitude_threshold
+);
+
+// 星生成のメインロジックをこの関数にカプセル化
+int run_simulation(unsigned int seed) {
+    std::cout << "\n--- シミュレーション開始 (シード値: " << seed << ") ---\n";
+
+    // 1. Setup random number generator with the given seed
+    std::mt19937 gen(seed);
 
     // Helper function to normalize a vector of weights to sum to 1.0
     auto normalize_weights = [](std::vector<double>& weights) {
@@ -407,55 +514,19 @@ int main() {
         }
     }
 
-    // 赤道・黄道の描画有無をユーザーに確認
+    // 描画パラメータをユーザーから取得
     bool show_celestial_lines = true;
-    std::cout << "星図に赤道と黄道を描画しますか？ (T/F, デフォルト: T): ";
-    std::getline(std::cin, line);
-    if (!line.empty() && (line[0] == 'F' || line[0] == 'f')) {
-        show_celestial_lines = false;
-    }
-
-    // SVGに描画する最大等級をユーザーに確認
     double max_magnitude_for_svg = 5.0;
-    std::cout << "星図に描画する星の最大等級を入力してください (デフォルト: 5.0): ";
-    std::getline(std::cin, line);
-    if (!line.empty()) {
-        try {
-            max_magnitude_for_svg = std::stod(line);
-        } catch (const std::exception&) {
-            std::cout << "無効な入力です。デフォルト値 " << max_magnitude_for_svg << " を使用します。" << std::endl;
-        }
-    }
-
-    // 星団領域の描画有無をユーザーに確認
     bool show_cluster_regions = true;
-    std::cout << "星図に星団の領域を描画しますか？ (T/F, デフォルト: T): ";
-    std::getline(std::cin, line);
-    if (!line.empty() && (line[0] == 'F' || line[0] == 'f')) {
-        show_cluster_regions = false;
-    }
-
-    // 星のラベル描画有無をユーザーに確認
     bool show_star_labels = true;
-    std::cout << "星図に明るい星のIDラベルを描画しますか？ (T/F, デフォルト: T): ";
-    std::getline(std::cin, line);
-    if (!line.empty() && (line[0] == 'F' || line[0] == 'f')) {
-        show_star_labels = false;
-    }
-
-    // ラベルを描画する等級のしきい値をユーザーに確認
     double label_magnitude_threshold = 2.5;
-    if (show_star_labels) {
-        std::cout << "IDラベルを描画する星の最大等級を入力してください (デフォルト: 2.5): ";
-        std::getline(std::cin, line);
-        if (!line.empty()) {
-            try {
-                label_magnitude_threshold = std::stod(line);
-            } catch (const std::exception&) {
-                std::cout << "無効な入力です。デフォルト値 " << label_magnitude_threshold << " を使用します。" << std::endl;
-            }
-        }
-    }
+    get_drawing_parameters_from_user(
+        show_celestial_lines,
+        max_magnitude_for_svg,
+        show_cluster_regions,
+        show_star_labels,
+        label_magnitude_threshold
+    );
 
     // 4. Calculate the number of stars
     // Correct volume of a sphere: (4/3) * PI * R^3
@@ -657,6 +728,25 @@ int main() {
     }
     ofs << "#\n";
 
+    // Write cluster 3D properties to the CSV for re-drawing
+    ofs << "# 星団の物理的プロパティ (再描画用)\n";
+    ofs << "# CLUSTER_PROP,id,center_x,center_y,center_z,major_axis_a,minor_axis_b,rot_alpha,rot_beta,rot_gamma,is_old\n";
+    ofs << std::fixed << std::setprecision(6); // Use higher precision for properties
+    for (const auto& prop : cluster_properties) {
+        ofs << "# CLUSTER_PROP,"
+            << prop.id << ","
+            << prop.center_x << ","
+            << prop.center_y << ","
+            << prop.center_z << ","
+            << prop.major_axis_a << ","
+            << prop.minor_axis_b << ","
+            << prop.rot_alpha << ","
+            << prop.rot_beta << ","
+            << prop.rot_gamma << ","
+            << prop.is_old << "\n";
+    }
+    ofs << "#\n";
+
     // CSV Header (Japanese as requested)
     ofs << "通し番号,連星系ID,視等級,スペクトル,絶対等級,距離r,経度θ,緯度φ,x,y,z,星団ID,星系絶対等級,星系視等級\n";
 
@@ -688,6 +778,175 @@ int main() {
     generate_star_map_svg(star_systems, "star_map_stereographic_north.svg", cluster_properties, ProjectionType::Stereographic, show_celestial_lines, max_magnitude_for_svg, show_cluster_regions, show_star_labels, label_magnitude_threshold);
     // 正距方位図法の星図を生成
     generate_star_map_svg(star_systems, "star_map_azimuthal_equidistant_north.svg", cluster_properties, ProjectionType::AzimuthalEquidistant, show_celestial_lines, max_magnitude_for_svg, show_cluster_regions, show_star_labels, label_magnitude_threshold);
+
+    std::cout << "\n--- シミュレーション完了 ---\n";
+    return 0;
+}
+
+// 描画パラメータをユーザーから取得するヘルパー関数の実装
+void get_drawing_parameters_from_user(
+    bool& show_celestial_lines,
+    double& max_magnitude_for_svg,
+    bool& show_cluster_regions,
+    bool& show_star_labels,
+    double& label_magnitude_threshold
+) {
+    std::string line;
+
+    // 赤道・黄道の描画有無をユーザーに確認
+    std::cout << "星図に赤道と黄道を描画しますか？ (T/F, デフォルト: T): ";
+    std::getline(std::cin, line);
+    if (!line.empty() && (line[0] == 'F' || line[0] == 'f')) {
+        show_celestial_lines = false;
+    } else {
+        show_celestial_lines = true;
+    }
+
+    // SVGに描画する最大等級をユーザーに確認
+    std::cout << "星図に描画する星の最大等級を入力してください (デフォルト: 5.0): ";
+    std::getline(std::cin, line);
+    if (!line.empty()) {
+        try {
+            max_magnitude_for_svg = std::stod(line);
+        } catch (const std::exception&) {
+            std::cout << "無効な入力です。デフォルト値 " << max_magnitude_for_svg << " を使用します。" << std::endl;
+        }
+    }
+
+    // 星団領域の描画有無をユーザーに確認
+    std::cout << "星図に星団の領域を描画しますか？ (T/F, デフォルト: T): ";
+    std::getline(std::cin, line);
+    if (!line.empty() && (line[0] == 'F' || line[0] == 'f')) {
+        show_cluster_regions = false;
+    } else {
+        show_cluster_regions = true;
+    }
+
+    // 星のラベル描画有無をユーザーに確認
+    std::cout << "星図に明るい星のIDラベルを描画しますか？ (T/F, デフォルト: T): ";
+    std::getline(std::cin, line);
+    if (!line.empty() && (line[0] == 'F' || line[0] == 'f')) {
+        show_star_labels = false;
+    } else {
+        show_star_labels = true;
+    }
+
+    // ラベルを描画する等級のしきい値をユーザーに確認
+    if (show_star_labels) {
+        std::cout << "IDラベルを描画する星の最大等級を入力してください (デフォルト: 2.5): ";
+        std::getline(std::cin, line);
+        if (!line.empty()) {
+            try {
+                label_magnitude_threshold = std::stod(line);
+            } catch (const std::exception&) {
+                std::cout << "無効な入力です。デフォルト値 " << label_magnitude_threshold << " を使用します。" << std::endl;
+            }
+        }
+    }
+}
+
+// CSVからデータを読み込んで星図を再描画する関数
+void redraw_from_csv() {
+    std::cout << "\n--- CSVから星図を再生成 ---" << std::endl;
+    std::cout << "読み込むCSVファイル名を入力してください (デフォルト: star_systems.csv): ";
+    std::string filename;
+    std::getline(std::cin, filename);
+    if (filename.empty()) {
+        filename = "star_systems.csv";
+    }
+
+    // CSVからデータをロード
+    auto loaded_data = load_stars_and_clusters_from_csv(filename);
+    if (!loaded_data) {
+        // エラーメッセージはload_stars_and_clusters_from_csv内で表示される
+        std::cout << "メニューに戻ります。" << std::endl;
+        return;
+    }
+
+    // 読み込んだデータを展開 (コピーを避けるためconst参照を使用)
+    const auto& star_systems = loaded_data->first;
+    const auto& cluster_properties = loaded_data->second;
+
+    // 新しい描画パラメータをユーザーから取得
+    std::cout << "\n新しい描画パラメータを入力してください:" << std::endl;
+    bool show_celestial_lines = true;
+    double max_magnitude_for_svg = 5.0;
+    bool show_cluster_regions = true;
+    bool show_star_labels = true;
+    double label_magnitude_threshold = 2.5;
+    get_drawing_parameters_from_user(
+        show_celestial_lines,
+        max_magnitude_for_svg,
+        show_cluster_regions,
+        show_star_labels,
+        label_magnitude_threshold
+    );
+
+    // 新しい設定で星図を再生成 (ファイル名を変えて上書きを防ぐ)
+    std::cout << "\n--- 星図の再生成 ---" << std::endl;
+    generate_star_map_svg(star_systems, "redraw_star_map_stereographic_north.svg", cluster_properties, ProjectionType::Stereographic, show_celestial_lines, max_magnitude_for_svg, show_cluster_regions, show_star_labels, label_magnitude_threshold);
+    generate_star_map_svg(star_systems, "redraw_star_map_azimuthal_equidistant_north.svg", cluster_properties, ProjectionType::AzimuthalEquidistant, show_celestial_lines, max_magnitude_for_svg, show_cluster_regions, show_star_labels, label_magnitude_threshold);
+
+    std::cout << "\n--- 再描画完了 ---\n";
+}
+
+int main(int argc, char* argv[]) {
+    // コマンドライン引数でシードが指定された場合は、一度だけ実行して終了する（従来通りの動作）
+    if (argc > 1) {
+        try {
+            unsigned int seed = std::stoul(argv[1]);
+            std::cout << "コマンドラインで指定されたシード値で実行します: " << seed << std::endl;
+            if (run_simulation(seed) != 0) {
+                std::cerr << "シミュレーション中にエラーが発生しました。" << std::endl;
+            }
+        } catch (const std::exception& e) {
+            std::cerr << "エラー: 無効なシード値です (" << e.what() << ")" << std::endl;
+            return 1;
+        }
+        return 0;
+    }
+
+    // インタラクティブモード
+    while (true) {
+        std::cout << "\n========================================" << std::endl;
+        std::cout << " Star System Generator" << std::endl;
+        std::cout << "========================================" << std::endl;
+        std::cout << "[1] 新しい星空をランダムに生成" << std::endl;
+        std::cout << "[2] シード値を指定して星空を生成" << std::endl;
+        std::cout << "[3] CSVファイルから星図を再生成" << std::endl;
+        std::cout << "[0] 終了" << std::endl;
+        std::cout << "選択してください: ";
+
+        std::string choice_str;
+        std::getline(std::cin, choice_str);
+
+        if (choice_str == "1") {
+            std::random_device rd;
+            unsigned int seed = rd();
+            if (run_simulation(seed) != 0) {
+                std::cout << "エラーが発生しました。メニューに戻ります。" << std::endl;
+            }
+        } else if (choice_str == "2") {
+            std::cout << "使用するシード値を入力してください: ";
+            std::string seed_str;
+            std::getline(std::cin, seed_str);
+            try {
+                unsigned int seed = std::stoul(seed_str);
+                if (run_simulation(seed) != 0) {
+                    std::cout << "エラーが発生しました。メニューに戻ります。" << std::endl;
+                }
+            } catch (const std::exception& e) {
+                std::cout << "エラー: 無効なシード値です。メニューに戻ります。" << std::endl;
+            }
+        } else if (choice_str == "3") {
+            redraw_from_csv();
+        } else if (choice_str == "0" || choice_str.empty()) { // Enterキーだけでも終了
+            std::cout << "プログラムを終了します。" << std::endl;
+            break;
+        } else {
+            std::cout << "無効な選択です。もう一度入力してください。" << std::endl;
+        }
+    }
 
     return 0;
 }
