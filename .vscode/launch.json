@@ -1,0 +1,17 @@
+{
+    "configurations": [
+        {
+            "name": "C/C++: cl.exe アクティブ ファイルのビルドとデバッグ",
+            "type": "cppvsdbg",
+            "request": "launch",
+            "program": "${fileDirname}\\star_system_generator.exe",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${fileDirname}",
+            "environment": [],
+            "console": "integratedTerminal",
+            "preLaunchTask": "C/C++: cl.exe アクティブなファイルのビルド"
+        }
+    ],
+    "version": "2.0.0"
+}
