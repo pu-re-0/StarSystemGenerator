@@ -1,0 +1,368 @@
+﻿Abzu
+Acheron
+Achilles
+Acat
+Adad
+Adonis
+Adrasteia
+Aegis
+Aeneas
+Aengus
+Aeolus
+Ahriman
+Ahura Mazda
+Aine
+Ajax
+Alfheim
+Ambrosia
+Amun
+Anansi
+Andromeda
+Anshar
+Antigone
+Anu
+Anubis
+Anuket
+Apeiron
+Aphrodite
+Apollo
+Arachne
+Ares
+Argus
+Ariadne
+Artemis
+Asclepius
+Asgard
+Athena
+Aten
+Atlantis
+Atlas
+Atum
+Audumbla
+Aurora
+Avalon
+Bacchus
+Balder
+Baron Samedi
+Bastet
+Bellona
+Belobog
+Bennu
+Bifrost
+Bragi
+Brahma
+Brigid
+Cadmus
+Calypso
+Cassandra
+Castor
+Centaur
+Cerberus
+Cernunnos
+Chalchiuhtlicue
+Chaos
+Charon
+Chernobog
+Chimera
+Circe
+Coatlicue
+Coyote
+Cronus
+Cyclops
+Daedalus
+Dagda
+Danu
+Daphne
+Dazhbog
+Deimos
+Demeter
+Dionysus
+Duat
+Durga
+Echo
+Eir
+El
+Electra
+Elysium
+Enki
+Epona
+Erebus
+Ereshkigal
+Erinyes
+Eros
+Europa
+Eurydice
+Fafnir
+Fenrir
+Flora
+Forseti
+Freya
+Fujin
+Galatea
+Ganesha
+Ganymede
+Garuda
+Geb
+Gilgamesh
+Ginnungagap
+Gjallarhorn
+Gorgon
+Griffin
+Gungnir
+Hachiman
+Hades
+Hanuman
+Harmonia
+Harpy
+Hathor
+Hati
+Hecate
+Heimdall
+Hel
+Helle
+Hephaestus
+Hera
+Heracles
+Hermes
+Hestia
+Hippolyta
+Hoenir
+Horus
+Huginn
+Huitzilopochtli
+Humbaba
+Hydra
+Hyperion
+Icarus
+Inari
+Inanna
+Indra
+Inti
+Iris
+Isis
+Ishtar
+Itzamna
+Ixchel
+Izanagi
+Izanami
+Janus
+Jason
+Jormungandr
+Jotunheim
+Juno
+Jupiter
+Kali
+Kannon
+Khepri
+Khonsu
+Krishna
+Kvasir
+Lada
+Lakshmi
+Laocoon
+Lilith
+Lir
+Loki
+Lugh
+Maat
+Macha
+Magni
+Manannan
+Manitou
+Marduk
+Mars
+Marzanna
+Maui
+Medusa
+Mercury
+Midas
+Midgard
+Minerva
+Minotaur
+Mitra
+Mictlan
+Mjolnir
+Modi
+Mokosh
+Morpheus
+Morrigan
+Muninn
+Nabu
+Narcissus
+Neb-Kadrezzar
+Nemesis
+Neptune
+Nereus
+Niamh
+Nidhogg
+Nike
+Ninhursag
+Niobe
+Njord
+Nuada
+Nut
+Nyx
+Oceanus
+Odin
+Odysseus
+Olympus
+Ometeotl
+Orpheus
+Orion
+Osiris
+Pallas
+Pan
+Pangu
+Pandora
+Papa Legba
+Paris
+Patroclus
+Pegasus
+Pele
+Persephone
+Perun
+Phaethon
+Phobos
+Phoenix
+Pluto
+Pollux
+Poseidon
+Priam
+Prometheus
+Proteus
+Psyche
+Ptah
+Pwyll
+Quetzalcoatl
+Ra
+Ragnarok
+Ratatoskr
+Raven
+Rhea
+Rhiannon
+Rudra
+Ryujin
+Saraswati
+Saturn
+Scathach
+Scylla
+Sedna
+Sekhmet
+Selene
+Serket
+Seshat
+Set
+Shiva
+Shu
+Sigyn
+Siren
+Sisyphus
+Skadi
+Sleipnir
+Sobek
+Solaris
+Soma
+Sphinx
+Stribog
+Styx
+Sun Wukong
+Surtur
+Surya
+Susanoo
+Svarog
+Taliesin
+Tane
+Tantalus
+Taranis
+Tartarus
+Taweret
+Telemachus
+Tenjin
+Tethys
+Tezcatlipoca
+Thanatos
+Themis
+Theseus
+Thetis
+Thor
+Thoth
+Tiamat
+Tir na nOg
+Titan
+Tlaloc
+Tonatiuh
+Triglav
+Triton
+Tyr
+Typhon
+Ukko
+Ullr
+Uranus
+Ushas
+Utu
+Valhalla
+Vali
+Vanir
+Varuna
+Vayu
+Veles
+Venus
+Vidar
+Viracocha
+Vishnu
+Vulcan
+Xipe Totec
+Xochipilli
+Yggdrasil
+Yama
+Zalmoxis
+Zaria
+Zeus
+
+Cybertron
+Chronosphere
+Void Core
+Terra Nova
+Arcturus Prime
+Solaris
+Nexus Zero
+Quasar Gamma
+Singularity Point
+Heliosphere IX
+Binary Sun
+Origin Star
+Crimson Star
+Blue Giant
+Emerald Flare
+Golden Dawn
+Shadow Pulsar
+Crystal Nova
+Silent White
+Burning Helios
+Twin Star
+Iron Heart
+Gravity Well
+Serenade
+Whisperwind
+Yume no Shizuku
+Hoshikuzu no Yurikago
+Wasurerareta Tomoshibi
+Eternal Echo
+Luna Song
+Tenjou no Teien
+Gen'ei no Prism
+Toki no Yuragi
+Gin no Namida
+Akatsuki no Veil
+Amaterasu
+Tsukuyomi
+Kuon
+Tokoyami
+Utakata
+Kagura
+Shiranui
+Yata
+Mikage
+Tasogare
+Akebono
+Sagiri

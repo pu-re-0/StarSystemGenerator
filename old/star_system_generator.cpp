@@ -11,12 +11,12 @@
 // Struct to hold star system properties
 struct StarSystem {
     long long id;
-    double apparent_magnitude;
+    float apparent_magnitude;
     std::string spectral_type;
-    double absolute_magnitude;
-    double distance_r;
-    double longitude_theta; // 経度 (radians)
-    double latitude_phi;    // 緯度 (radians)
+    float absolute_magnitude;
+    float distance_r;
+    float longitude_theta; // 経度 (radians)
+    float latitude_phi;    // 緯度 (radians)
 };
 
 int main() {
@@ -27,26 +27,26 @@ int main() {
     std::mt19937 gen(2025062809); // For reproducible results, use a fixed seed like 42  数値はペルド・ペルソーネより
 
     // 2. Define spectral type properties (probabilities and absolute magnitude ranges)
-    // Probabilities are approximate and sum to 1.0
+    // Probabilities are approximate and sum to 1.0f
     std::vector<std::string> spectral_types_vec = {"M", "K", "G", "F", "A", "B", "O", "WD", "RG", "ES"};
-    std::vector<double> spectral_type_weights = {0.70, 0.15, 0.07, 0.03, 0.01, 0.005, 0.0005, 0.02, 0.01, 0.0045}; // Sums to 1.0
+    std::vector<float> spectral_type_weights = {0.70, 0.15, 0.0f7, 0.0f3, 0.0f1, 0.0f05, 0.0f005, 0.0f2, 0.0f1, 0.0f045}; // Sums to 1.0f
 
     // Absolute magnitude ranges for each spectral type {min_M, max_M}
-    std::map<std::string, std::pair<double, double>> abs_mag_ranges;
-    abs_mag_ranges["O"] = {-6.0, -4.0};
-    abs_mag_ranges["B"] = {-4.0, -1.0};
-    abs_mag_ranges["A"] = {-1.0, 2.0};
-    abs_mag_ranges["F"] = {2.0, 3.5};
-    abs_mag_ranges["G"] = {3.5, 5.0};
-    abs_mag_ranges["K"] = {5.0, 7.5};
-    abs_mag_ranges["M"] = {7.5, 12.0};
-    abs_mag_ranges["WD"] = {10.0, 16.0}; // White Dwarf
-    abs_mag_ranges["RG"] = {-3.0, 0.0};  // Red Giant
-    abs_mag_ranges["ES"] = {-8.0, -4.0}; // Exotic/Supergiant (e.g., Supergiants)
+    std::map<std::string, std::pair<float, float>> abs_mag_ranges;
+    abs_mag_ranges["O"] = {-6.0f, -4.0f};
+    abs_mag_ranges["B"] = {-4.0f, -1.0f};
+    abs_mag_ranges["A"] = {-1.0f, 2.0f};
+    abs_mag_ranges["F"] = {2.0f, 3.5};
+    abs_mag_ranges["G"] = {3.5, 5.0f};
+    abs_mag_ranges["K"] = {5.0f, 7.5};
+    abs_mag_ranges["M"] = {7.5, 12.0f};
+    abs_mag_ranges["WD"] = {10.0f, 16.0f}; // White Dwarf
+    abs_mag_ranges["RG"] = {-3.0f, 0.0f};  // Red Giant
+    abs_mag_ranges["ES"] = {-8.0f, -4.0f}; // Exotic/Supergiant (e.g., Supergiants)
 
     // 3. Define the radius of the spherical space
-    double R_parsecs = 100.0; // Default radius in parsecs (pc)
-    std::cout << "半径Rパーセクの球形状空間の半径を入力してください (例: 100.0): ";
+    float R_parsecs = 100.0f; // Default radius in parsecs (pc)
+    std::cout << "半径Rパーセクの球形状空間の半径を入力してください (例: 100.0f): ";
     std::cin >> R_parsecs;
 
     if (R_parsecs <= 0) {
@@ -56,9 +56,9 @@ int main() {
 
     // 4. Calculate the number of stars
     // Correct volume of a sphere: (4/3) * PI * R^3
-    const double PI = std::acos(-1.0); // Portable way to get PI
-    double volume = (4.0 / 3.0) * PI * std::pow(R_parsecs, 3);
-    double star_density = 0.13; // Star system density in pc^-3
+    const float PI = std::acos(-1.0f); // Portable way to get PI
+    float volume = (4.0f / 3.0f) * PI * std::pow(R_parsecs, 3);
+    float star_density = 0.13; // Star system density in pc^-3
 
     long long num_stars = static_cast<long long>(volume * star_density);
     if (num_stars == 0) { // Ensure at least one star if the calculated number is zero
@@ -71,10 +71,10 @@ int main() {
     // 5. Distributions for position (uniform distribution within a sphere)
     // For uniform distribution in a sphere, r^3 should be uniform.
     // To avoid log10(0) for distance, ensure the lower bound is slightly above zero.
-    std::uniform_real_distribution<double> dist_r_cube(std::numeric_limits<double>::epsilon(), 1.0);
-    std::uniform_real_distribution<double> dist_theta(0.0, 2.0 * PI); // Longitude [0, 2*PI)
+    std::uniform_real_distribution<float> dist_r_cube(std::numeric_limits<float>::epsilon(), 1.0f);
+    std::uniform_real_distribution<float> dist_theta(0.0f, 2.0f * PI); // Longitude [0, 2*PI)
     // For uniform distribution over a sphere's surface, sin(phi) should be uniform.
-    std::uniform_real_distribution<double> dist_phi_sin(-1.0, 1.0); // For sin(phi) [-1, 1]
+    std::uniform_real_distribution<float> dist_phi_sin(-1.0f, 1.0f); // For sin(phi) [-1, 1]
 
     // 6. Discrete distribution for spectral types
     std::discrete_distribution<> spectral_dist(spectral_type_weights.begin(), spectral_type_weights.end());
@@ -100,16 +100,16 @@ int main() {
         // Generate absolute magnitude based on spectral type
         auto range_it = abs_mag_ranges.find(s.spectral_type);
         if (range_it != abs_mag_ranges.end()) {
-            std::uniform_real_distribution<double> dist_abs_mag(range_it->second.first, range_it->second.second);
+            std::uniform_real_distribution<float> dist_abs_mag(range_it->second.first, range_it->second.second);
             s.absolute_magnitude = dist_abs_mag(gen);
         } else {
             // Fallback if spectral type not found (shouldn't happen with current setup)
-            s.absolute_magnitude = 5.0; // Default to Sun-like if unknown
+            s.absolute_magnitude = 5.0f; // Default to Sun-like if unknown
         }
 
         // Calculate apparent magnitude: m = M + 5 * (log10(d) - 1)
         // This formula is equivalent to m = M + 5 * log10(d/10pc)
-        s.apparent_magnitude = s.absolute_magnitude + 5.0 * (std::log10(s.distance_r) - 1.0);
+        s.apparent_magnitude = s.absolute_magnitude + 5.0f * (std::log10(s.distance_r) - 1.0f);
 
         star_systems.push_back(s);
     }

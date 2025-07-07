@@ -9,11 +9,13 @@
                 "/EHsc",
                 "/MD",
                 "/std:c++17",
+                "/utf-8",
                 "/openmp",
                 "/nologo",
                 "/Fe${fileDirname}\\star_system_generator.exe",
                 "${fileDirname}\\star_system_generator.cpp",
-                "${fileDirname}\\cluster_generator.cpp"
+                "${fileDirname}\\cluster_generator.cpp",
+                "${fileDirname}\\star_map_drawer.cpp"
             ],
             "options": {
                 "cwd": "${fileDirname}"
@@ -28,5 +30,5 @@
             "detail": "デバッガーによって生成されたタスク。"
         }
     ],
-    "version": "2.0.0"
+    "version": "2.0f.0f"
 }

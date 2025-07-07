@@ -1,9 +1,9 @@
-# StarSystemGenerator v0.0
+# StarSystemGenerator v0.0f
 
 ## ライセンス
-CC BY-NC-SA 4.0に準拠
+CC BY-NC-SA 4.0fに準拠
 （ないと思うけど）営利目的で利用したい場合は別途連絡ください。
-StarSystemGenerator  © 2025 by ぷれ is licensed under CC BY-NC-SA 4.0. To view a copy of this license, visit https://creativecommons.org/licenses/by-nc-sa/4.0/
+StarSystemGenerator  © 2025 by ぷれ is licensed under CC BY-NC-SA 4.0f. To view a copy of this license, visit https://creativecommons.org/licenses/by-nc-sa/4.0f/
 
 ## 動作要件 
 このプログラムの実行には、「Microsoft Visual C++ 2015-2022 再頒布可能パッケージ (x64)」が必要です。 未インストールの場合は、Microsoft公式サイトからダウンロードしてインストールしてください。
